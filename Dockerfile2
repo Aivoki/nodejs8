@@ -1,0 +1,41 @@
+FROM rhscl/httpd-24-rhel7
+
+# Author
+MAINTAINER Luis Henrique Braz Sobrinho
+
+# Descrições
+LABEL author="Luis Henrique Braz Sobrinho" \
+projeto="INEP" \
+versao="1.0" \
+descricao="Apache 2.4" \
+SO="RHEL7"
+
+ENV PATH=$PATH:/opt/rh/nodejs010/root/usr/bin/
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/rh/nodejs010/root/lib64:/opt/rh/v8314/root/usr/lib64
+ENV LIBRARY_PATH=$LIBRARY_PATH:/opt/rh/nodejs010/root/lib64:/opt/rh/v8314/root/usr/lib64
+
+USER root
+
+RUN echo "200.130.24.31 satellite satellite.dmzinep.gov.br" >> /etc/hosts && \
+    yum repolist > /dev/null && \
+    yum-config-manager --enable rhel-server-rhscl-7-rpms && \
+    yum-config-manager --enable rhel-7-server-optional-rpms && \
+    INSTALL_PKGS="nodejs010 gcc" && \
+    yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
+    rpm -V $INSTALL_PKGS && \
+    yum clean all -y
+
+#COPY source /opt/app-root
+
+#RUN source /opt/app-root/source && \
+RUN  npm install -g gulp
+
+RUN chown -R 1001:1001 ./
+
+#RUN echo -e "#INICIO DA BUILD \n\n \
+#export PATH=\$PATH:/opt/rh/rh-nodejs8/root/usr/bin/ \n \
+#npm install --production \n \
+#npm run-script gulp prod \n \
+#fix-permissions ./" >> /usr/libexec/s2i/assemble
+
+USER 1001
